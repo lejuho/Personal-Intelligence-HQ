@@ -12,12 +12,22 @@ project_root = os.path.dirname(os.path.dirname(current_dir))
 sys.path.append(project_root)
 
 from src.config import paths
+import json
 
-# [설정] 본인의 OKX API 키 입력
-OKX_API_KEY = "4dea57f7-d2cd-49d6-bcdb-1741d9a48c03"
-OKX_SECRET_KEY = "1DB856061686277B4700BEE2FBF0D1AE"
-OKX_PASSWORD = "Camping123^^"
-GEMINI_API_KEY = "AIzaSyDT3-NHZr1KYFWgS77naMuHb4okAbIZmRc"
+# [설정] secrets.json에서 키 로드
+def load_secrets():
+    try:
+        with open(paths.SECRETS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"오류: {paths.SECRETS_FILE} 파일을 찾을 수 없습니다.")
+        return {}
+
+secrets = load_secrets()
+OKX_API_KEY = secrets.get("OKX_API_KEY", "")
+OKX_SECRET_KEY = secrets.get("OKX_SECRET_KEY", "")
+OKX_PASSWORD = secrets.get("OKX_PASSWORD", "")
+GEMINI_API_KEY = secrets.get("GEMINI_API_KEY", "")
 
 genai.configure(api_key=GEMINI_API_KEY)
 

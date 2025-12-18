@@ -13,6 +13,8 @@ x-shared: &shared
     - ./data:/app/data
     - ./src/config/secrets.json:/app/src/config/secrets.json:ro
     - ./src:/app/src:ro
+  networks:
+    - investment-net
 
 services:
   backend:

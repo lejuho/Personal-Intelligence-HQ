@@ -14,7 +14,16 @@ from src.config import paths
 SAVE_DIR = paths.WEATHER_DATA_DIR
 # Directory creation is handled in config/paths.py
 
-API_KEY = "38dd257211fa38fd004451ca1fd1f593" # 여기에 키 입력
+def load_secrets():
+    try:
+        with open(paths.SECRETS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"오류: {paths.SECRETS_FILE} 파일을 찾을 수 없습니다.")
+        return {}
+
+secrets = load_secrets()
+API_KEY = secrets.get("OPENWEATHERMAP_API_KEY", "") # 여기에 키 입력
 
 # 감시할 핵심 경제 거점 (위도, 경도)
 WATCH_LOCATIONS = {

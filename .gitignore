@@ -1,0 +1,30 @@
+# [Data & Databases]
+data/
+*.db
+*.sqlite3
+search_history.json
+onbid_investment_list.txt
+my_chat_log.db
+
+# [Configuration & Secrets]
+src/config/secrets.json
+.env
+
+# [Python]
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+gemini_env/
+gemini_env_notebook/
+
+# [Docker]
+.dockerignore
+
+# [OS]
+.DS_Store
+Thumbs.db

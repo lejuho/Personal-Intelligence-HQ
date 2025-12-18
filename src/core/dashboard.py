@@ -87,13 +87,36 @@ tab1, tab2, tab3 = st.tabs(["📊 전략 브리핑", "💰 AI 트레이딩 (OKX)
 # Tab 1: 전략 브리핑 (Analyst Insight)
 # =========================================================
 with tab1:
+    col_a, col_b = st.columns([3, 1])
+    with col_a:
+        st.header("⚡ Strategic Daily Briefing")
+    with col_b:
+        if st.button("🔄 지금 분석 실행", use_container_width=True):
+            import requests
+            try:
+                # Docker 내부 통신: backend 컨테이너 이름 사용 권장 (또는 localhost)
+                # Streamlit 컨테이너 -> Backend 컨테이너 통신은 http://backend:8000
+                res = requests.post("http://backend:8000/run-analysis")
+                if res.status_code == 200:
+                    st.toast("✅ 분석을 시작했습니다! (완료까지 1~2분 소요)")
+                else:
+                    st.error(f"서버 오류: {res.status_code}")
+            except Exception as e:
+                # 로컬 실행(localhost) 호환성을 위해 fallback 시도
+                try:
+                    res = requests.post("http://localhost:8000/run-analysis")
+                    if res.status_code == 200:
+                        st.toast("✅ 분석을 시작했습니다! (Localhost)")
+                except:
+                    st.error(f"백엔드 연결 실패: {e}")
+
     latest_insight = load_latest_insight()
     if latest_insight:
         insight_date, content = latest_insight
         st.info(f"📅 생성 시각: {insight_date}")
         st.markdown(content)
     else:
-        st.warning("아직 생성된 브리핑이 없습니다. 'run_all.py'를 실행하세요.")
+        st.warning("아직 생성된 브리핑이 없습니다. '지금 분석 실행' 버튼을 눌러보세요.")
 
 # =========================================================
 # Tab 2: AI 트레이딩 (OKX + Fibonacci)

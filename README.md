@@ -49,3 +49,29 @@ docker-compose up -d
 *   **AI:** Google Gemini Pro (via API)
 *   **Data:** Pandas, SQLite, Plotly
 *   **Infra:** Docker, Docker Compose
+
+## 🔄 Data Sync & Backup (Multi-Device)
+
+클라우드 없이 여러 PC에서 데이터를 최신 상태로 유지하려면 `data` 폴더와 동기화 스크립트를 사용하세요.
+
+### 1. 데이터 추출 (기존 PC)
+PC를 종료하거나 데이터를 옮기기 전에 실행합니다. DB의 모든 내용을 파일로 변환합니다.
+```bash
+python scripts/db_backup.py
+```
+*   `data/db_backup.sql` 파일이 생성됩니다.
+*   이제 `data` 폴더 전체를 USB나 동기화 툴(Syncthing 등)을 통해 다른 PC로 옮깁니다.
+
+### 2. 데이터 복구 (새 PC)
+새로운 PC에서 데이터를 불러올 때 실행합니다.
+```bash
+# 컨테이너가 실행 중이어야 합니다.
+docker-compose up -d
+
+# 백업본 밀어넣기
+python scripts/db_restore.py
+```
+
+## ⚠️ Important Note
+*   **secrets.json:** 보안을 위해 Git에 포함되지 않습니다. 새 PC로 이동 시 `src/config/secrets.json` 파일을 수동으로 복사해주세요.
+*   **Volume:** Docker Volume은 PC마다 로컬로 생성되므로, 반드시 위 스크립트를 통해 데이터를 주고받아야 DB 내용이 유지됩니다.

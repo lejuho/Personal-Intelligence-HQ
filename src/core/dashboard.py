@@ -37,11 +37,22 @@ st.set_page_config(page_title="Personal Intelligence HQ", layout="wide", page_ic
 # DB 파일 경로 설정 (Robust)
 if paths and hasattr(paths, 'DB_FILE'):
     DB_FILE = str(paths.DB_FILE)
+    ANALYSIS_STATE_FILE = str(paths.ANALYSIS_STATE_FILE)
 else:
     # fallback: 프로젝트 루트의 my_chat_log.db
     DB_FILE = os.path.join(project_root, "data", "database", "my_chat_log.db")
+    ANALYSIS_STATE_FILE = os.path.join(project_root, "data", "analysis_state.json")
 
 SESSION_THRESHOLD_MIN = 30 
+
+def load_analysis_state():
+    """분석 진행 상황 로드"""
+    try:
+        if not os.path.exists(ANALYSIS_STATE_FILE):
+            return None
+        with open(ANALYSIS_STATE_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except: return None
 
 def load_chat_data():
     """채팅 로그 로드"""
@@ -90,6 +101,20 @@ with tab1:
     col_a, col_b = st.columns([3, 1])
     with col_a:
         st.header("⚡ Strategic Daily Briefing")
+        
+        # [상태 모니터링]
+        state = load_analysis_state()
+        if state:
+            status = state.get("status")
+            detail = state.get("detail", "")
+            updated = state.get("updated_at", "")
+            
+            if status == "running":
+                st.info(f"🔄 **분석 진행 중...** ({updated})\n\n{detail}")
+            elif status == "failed":
+                st.error(f"❌ **분석 실패** ({updated})\n\n{detail}")
+            # completed 상태는 아래 최신 브리핑이 뜨므로 굳이 배너 불필요 (원하면 success 띄워도 됨)
+
     with col_b:
         if st.button("🔄 지금 분석 실행", use_container_width=True):
             import requests
@@ -98,7 +123,7 @@ with tab1:
                 # Streamlit 컨테이너 -> Backend 컨테이너 통신은 http://backend:8000
                 res = requests.post("http://backend:8000/run-analysis")
                 if res.status_code == 200:
-                    st.toast("✅ 분석을 시작했습니다! (완료까지 1~2분 소요)")
+                    st.toast("✅ 분석을 시작했습니다! 잠시 후 새로고침하세요.")
                 else:
                     st.error(f"서버 오류: {res.status_code}")
             except Exception as e:
